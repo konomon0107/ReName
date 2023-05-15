@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <title>ファイル名一括変更</title>
+    <style>
+        body {
+            background-color: rgb(127, 204, 228);
+            line-height: 0.5;
+        }
+        div {
+            border: 1px dashed white;
+        }
+        input {
+            border-radius: 5%;
+            margin: 3px;
+        }
+        #FolderDaialog {
+            font-size: large;
+            font-weight: 700;
+            border: 0em;
+            border-radius: 5%;
+            color: rgb(39, 40, 41);
+            background-color: rgb(241, 198, 103);
+        }
+        #FolderDaialog:hover {
+            color: aliceblue;
+            background-color: coral;
+        }
+        #go {
+            width: 300px;
+            font-size: large;
+            font-weight: 700;
+            border: 0.5em;
+            border-radius: 5%;
+            color: rgb(39, 40, 41);
+            background-color: rgb(241, 198, 103);
+            position: absolute;
+            top: 605px;
+            right: 0px;
+            bottom: 20px;
+            left: 0px;
+            margin: auto;
+        }
+        #go:hover {
+            color: aliceblue;
+            background-color: coral;
+        }
+    </style>
+</head>
+<body>
+    <div>
+    <h5>選択されたフォルダ内のファイルを一括で変換します</h5>
+    <input type="text" id="folder_name" size="55" placeholder="フォルダを選択して下さい。">
+    <button id="FolderDaialog" onclick="select_folder()">参照</button>
+    </div>
+    <div>
+    <h5>連番を選択する際は必須項目になります。その他の表示形式では不要です。</h5>
+    <input type="text" id="header" size="30" placeholder="ファイル名を入力してください">
+    </div>
+    <div>
+    <h5>ファイル名の後に続く表示形式を選択して下さい。</h5>
+    <h6>_01, _02,...
+        <input type="radio" name="radio" id="format1" value="1" onclick="radioDeselection(this, 1)">
+        _YYYYMMDD
+        <input type="radio" name="radio" id="format2" value="2" onclick="radioDeselection(this, 2)">
+        _YYYYMMDDhhmmss
+        <input type="radio" name="radio" id="format3" value="3" onclick="radioDeselection(this, 3)">
+    </h6>
+    </div>
+    <div>
+    <h5>拡張子を選択して下さい。(複数選択不可)</h5>
+    <h6>.csv
+        <input type="radio" name="extension" id="csv" value=".csv" onclick="radioDeselection_extension(this, 1)">
+        .txt
+        <input type="radio" name="extension" id="txt" value=".txt" onclick="radioDeselection_extension(this, 2)">
+        .pdf
+        <input type="radio" name="extension" id="pdf" value=".pdf" onclick="radioDeselection_extension(this, 3)">
+    </h6>
+    <h6>
+        .xlsx
+        <input type="radio" name="extension" id="xlsx" value=".xlsx" onclick="radioDeselection_extension(this, 4)">
+        .xlsm
+        <input type="radio" name="extension" id="xlsm" value=".xlsm" onclick="radioDeselection_extension(this, 5)">
+        .xml
+        <input type="radio" name="extension" id="xml" value=".xml" onclick="radioDeselection_extension(this, 6)">
+        .xls
+        <input type="radio" name="extension" id="xls" value=".xls" onclick="radioDeselection_extension(this, 7)">
+    </h6>
+    <h6>
+        .docx
+        <input type="radio" name="extension" id="docx" value=".docx" onclick="radioDeselection_extension(this, 8)">
+        .doc
+        <input type="radio" name="extension" id="doc" value=".doc" onclick="radioDeselection_extension(this, 9)">
+    </h6>
+    <h6>
+        .jpg
+        <input type="radio" name="extension" id="jpg" value=".jpg" onclick="radioDeselection_extension(this, 10)">
+        .jpeg
+        <input type="radio" name="extension" id="jpeg" value=".jpeg" onclick="radioDeselection_extension(this, 11)">
+        .png
+        <input type="radio" name="extension" id="png" value=".png" onclick="radioDeselection_extension(this, 12)">
+    </h6>
+    </div>
+    <div>
+        <h5>名前を変更する順番を選択して下さい</h5>
+        <h6>
+            作成日時順<input type="radio" name="sort" value="c" onclick="radioDeselection_sort(this, 1)">
+            更新日時順<input type="radio" name="sort" value="m" onclick="radioDeselection_sort(this, 2)">
+            ファイル名順<input type="radio" name="sort" value="n" onclick="radioDeselection_sort(this, 3)">
+        </h6>
+    </div>
+    <button id="go" onclick="go_click()">実行</button>
+    <script type="text/javascript">
+        var remove = 0;
+        // clickでcheckをはずす
+        function radioDeselection(already, numeric) {
+            if (remove == numeric) {
+                already.checked = false;
+                remove = 0;
+            } else {
+                remove = numeric;
+            }
+        }
+        var remove_extention = 0;
+        // clickでcheckをはずす
+        function radioDeselection_extension(already, numeric) {
+            if (remove_extention == numeric) {
+                already.checked = false;
+                remove_extention = 0;
+            } else {
+                remove_extention = numeric;
+            }
+        }
+        var remove_sort = 0;
+        // clickでcheckをはずす
+        function radioDeselection_sort(already, numeric) {
+            if (remove_sort == numeric) {
+                already.checked = false;
+                remove_sort = 0;
+            } else {
+                remove_sort = numeric;
+            }
+        }
+        // 参照クリック
+        function select_folder() {
+            pywebview.api.get_folder().then(set_folder_name)
+        }
+        // pythonから受け取ったフォルダ名をセット
+        function set_folder_name(response) {
+            let test = document.getElementById("test");
+            let folder_name = document.getElementById("folder_name");
+            let g = document.getElementById('test')
+            folder_name.value = response.message
+            g.innerText = ''
+        }
+        // 実行クリック
+        function go_click() {
+            // 拡張子の確認
+            let extension = document.getElementsByName('extension');
+            let ex = ''
+            for (let i = 0; i < extension.length; i++) {
+                if (extension[i].checked) {
+                    ex = extension[i].value
+                }
+            }
+            if (ex == "") {
+                alert("拡張子を選択して下さい。")
+                return false
+            }
+            // 表示形式の取得
+            let format1 = document.getElementById("format1");
+            let format2 = document.getElementById("format2");
+            let format3 = document.getElementById("format3");
+            if (format1.checked) {
+                f = format1.value
+            } else if (format2.checked) {
+                f = format2.value
+            } else if (format3.checked) {
+                f = format3.value
+            } else {
+                alert("表示形式を選択して下さい")
+                return false
+            }
+            // 昇順取得
+            let sort = document.getElementsByName('sort');
+            let sr = ''
+            for (let s = 0; s < sort.length; s++) {
+                if (sort[s].checked) {
+                    sr = sort[s].value
+                }
+            }
+            if (sr == "") {
+                alert("ファイル名振り分け順を選択して下さい。")
+                return false
+            }
+            // 対象フォルダ―を取得
+            let trg_folder = document.getElementById("folder_name");
+            if (trg_folder.value == "") {
+                alert("フォルダー名を指定してください。");
+                return false;
+            } else {
+                folder_name = trg_folder.value;
+            }
+            // ファイル名の取得
+            let trg_file = document.getElementById("header");
+            if (f == '1') {
+                if (trg_file.value == "") {
+                    alert("ファイル名を指定してください。");
+                    return false;
+                } else {
+                    file_name = trg_file.value;
+                }
+            } else {
+                file_name = ""
+            }
+            pywebview.api.execution(folder_name,file_name,f,ex,sr).then(return_from_python)
+        }
+        // pythonの実行が完了した時の処理
+        function return_from_python(response) {
+            m = response.message
+            alert(m)
+        }
+    </script>
+</body>
+</html>
